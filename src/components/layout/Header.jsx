@@ -8,6 +8,15 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  // Get user display name - try user.name first, then user.user_metadata.name if available,
+  // then fall back to email username or generic "Admin User"
+  const getUserDisplayName = () => {
+    if (user?.user_metadata?.name) return user.user_metadata.name;
+    if (user?.name) return user.name;
+    if (user?.email) return user.email.split('@')[0];
+    return 'Admin User';
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -35,7 +44,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
             </button>
             
             <div className="hidden md:block">
-              <h1 className="text-xl font-semibold text-gray-800">Welcome to Koherence Admin</h1>
+              <h1 className="text-xl font-semibold text-gray-800">Welcome {user ? getUserDisplayName() : ''}</h1>
             </div>
           </div>
 
@@ -55,7 +64,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
                   <RiUser3Line className="h-5 w-5" />
                 </div>
                 <span className="hidden md:inline-block font-medium text-sm text-gray-700">
-                  {user?.email ? user.email.split('@')[0] : 'Admin User'}
+                  {getUserDisplayName()}
                 </span>
               </button>
 

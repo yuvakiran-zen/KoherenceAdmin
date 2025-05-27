@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
 import {
   RiDashboardLine,
   RiApps2Line, 
@@ -12,6 +13,26 @@ import {
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
+  const { user, logout } = useAuth();
+  
+  // Get user display name - try user.name first, then user.user_metadata.name if available,
+  // then fall back to email username or generic "Admin User"
+  const getUserDisplayName = () => {
+    if (user?.user_metadata?.name) return user.user_metadata.name;
+    if (user?.name) return user.name;
+    if (user?.email) return user.email.split('@')[0];
+    return 'Admin User';
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Navigation is typically handled by the AuthContext's auth state change listener
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
   
   // Main navigation items
   const navigation = [
@@ -158,7 +179,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               
               <button 
                 className="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-red-600 hover:bg-red-50 transition-all mt-4"
-                onClick={() => {/* Implement logout */}}
+                onClick={handleLogout}
               >
                 <RiLogoutBoxRLine className="mr-3 h-5 w-5 flex-shrink-0" />
                 <span>Logout</span>
@@ -175,8 +196,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 <RiUser3Line className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-xs font-medium text-gray-900">Admin User</p>
-                <p className="text-xs text-gray-500">admin@koherence.com</p>
+                <p className="text-xs font-medium text-gray-900">{getUserDisplayName()}</p>
+                <p className="text-xs text-gray-500">{user?.email || 'admin@koherence.com'}</p>
               </div>
             </div>
           </div>
